@@ -59,6 +59,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
 import com.example.dessertclicker.data.Datasource.dessertList
+import com.example.dessertclicker.data.DessertUIState
 import com.example.dessertclicker.ui.theme.DessertClickerTheme
 import com.example.dessertclicker.model.Dessert
 
@@ -159,20 +160,9 @@ private fun shareSoldDessertsInformation(intentContext: Context, dessertsSold: I
 
 @Composable
 private fun DessertClickerApp(
-    desserts: List<Dessert>
+    desserts: List<Dessert>,
+    dessertUIState: DessertUIState
 ) {
-
-    var revenue by rememberSaveable { mutableStateOf(0) }
-    var dessertsSold by rememberSaveable { mutableStateOf(0) }
-
-    val currentDessertIndex by rememberSaveable { mutableStateOf(0) }
-
-    var currentDessertPrice by rememberSaveable {
-        mutableStateOf(desserts[currentDessertIndex].price)
-    }
-    var currentDessertImageId by rememberSaveable {
-        mutableStateOf(desserts[currentDessertIndex].imageId)
-    }
 
     Scaffold(
         topBar = {
@@ -181,27 +171,27 @@ private fun DessertClickerApp(
                 onShareButtonClicked = {
                     shareSoldDessertsInformation(
                         intentContext = intentContext,
-                        dessertsSold = dessertsSold,
-                        revenue = revenue
+                        dessertsSold = dessertUIState.dessertsSold,
+                        revenue = dessertUIState.revenue
                     )
                 }
             )
         }
     ) { contentPadding ->
         DessertClickerScreen(
-            revenue = revenue,
-            dessertsSold = dessertsSold,
-            dessertImageId = currentDessertImageId,
+            revenue = dessertUIState.revenue,
+            dessertsSold = dessertUIState.dessertsSold,
+            dessertImageId = dessertUIState.currentDessertImageId,
             onDessertClicked = {
 
                 // Update the revenue
-                revenue += currentDessertPrice
-                dessertsSold++
+                dessertUIState.revenue += dessertUIState.currentDessertPrice
+                dessertUIState.dessertsSold++
 
                 // Show the next dessert
-                val dessertToShow = determineDessertToShow(desserts, dessertsSold)
-                currentDessertImageId = dessertToShow.imageId
-                currentDessertPrice = dessertToShow.price
+                val dessertToShow = determineDessertToShow(desserts, dessertUIState.dessertsSold)
+                dessertUIState.currentDessertImageId = dessertToShow.imageId
+                dessertUIState.currentDessertPrice = dessertToShow.price
             },
             modifier = Modifier.padding(contentPadding)
         )
